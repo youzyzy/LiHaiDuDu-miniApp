@@ -1,0 +1,55 @@
+/* 全局 CSS 变量 - 从原 React 项目迁移 */
+
+page {
+  /* 背景色系 */
+  --background: #f5efe0;
+  --foreground: #3d2b1f;
+  --card: #fbf7ee;
+  --card-foreground: #3d2b1f;
+
+  /* 主题色 */
+  --primary: #8b5e3c;
+  --primary-foreground: #fbf7ee;
+  --secondary: #8fa98a;
+  --secondary-foreground: #3d2b1f;
+  --muted: #e8dfd0;
+  --muted-foreground: #7a6555;
+  --accent: #d4856a;
+  --accent-foreground: #fbf7ee;
+
+  /* 边框 */
+  --border: rgba(139, 94, 60, 0.18);
+  --ring: rgba(139, 94, 60, 0.4);
+
+  /* 纸张纹理相关 */
+  --paper-line: rgba(139, 94, 60, 0.1);
+  --paper-margin: rgba(211, 133, 106, 0.35);
+
+  /* 和纸胶带色 */
+  --washi-rose: #f2c4c4;
+  --washi-sage: #c4d9c4;
+  --washi-amber: #f2dba4;
+  --washi-lavender: #d4c4e8;
+
+  /* 便利贴色 */
+  --sticky-yellow: #fff3a3;
+  --sticky-pink: #ffd6d6;
+  --sticky-green: #d6f0d6;
+  --sticky-blue: #d6e8ff;
+
+  /* 基础样式 */
+  background-color: var(--background);
+  font-size: 56rpx;
+  color: var(--foreground);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * TODO: 字体加载
+ * 原项目使用 Google Fonts: Ma Shan Zheng（中文手写）+ Caveat（英文手写）
+ * 小程序可通过 Taro.loadFontFace() 加载，或使用 base64 内嵌
+ * 当前使用系统字体作为回退
+ * 中文手写回退: 'STKaiti', 'KaiTi', serif
+ * 英文手写回退: 'Segoe Script', cursive
+ */
