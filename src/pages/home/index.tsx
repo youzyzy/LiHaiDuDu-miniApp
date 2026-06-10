@@ -111,8 +111,8 @@ export default function HomePage() {
             border: '1px solid var(--border)',
           }}
         >
-          <PaperRuledLines lineHeight={28} />
-          <NotebookMarginLine />
+          <PaperRuledLines lineHeight={45} />
+          <NotebookMarginLine left={40} />
 
           <View style={{ paddingLeft: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 10 }}>
             <View>
