@@ -6,7 +6,7 @@ import { View, Text, Textarea } from '@tarojs/components'
  */
 export function WashiTape({
   color = '#F2C4C4',
-  width = 200,
+  width = 160,
   rotation = 0,
   pattern = 'dots',
   className = '',
@@ -32,7 +32,7 @@ export function WashiTape({
         position: 'absolute',
         zIndex: 10,
         width: `${width}px`,
-        height: '44rpx',
+        height: '36rpx',
         backgroundColor: color,
         backgroundImage: patternBg[pattern],
         backgroundSize: pattern === 'dots' ? '20px 20px' : undefined,
@@ -68,7 +68,7 @@ export function StickyNote({
       className={className}
       style={{
         position: 'relative',
-        padding: '24px',
+        padding: '18px',
         backgroundColor: color,
         transform: `rotate(${rotation}deg)`,
         boxShadow: shadow
@@ -97,8 +97,8 @@ export function StickyNote({
  * 纸张横线背景
  */
 export function PaperRuledLines({
-  lineHeight = 32,
-  offset = 8,
+  lineHeight = 28,
+  offset = 6,
 }: {
   lineHeight?: number
   offset?: number
@@ -128,7 +128,7 @@ export function PaperRuledLines({
 /**
  * 笔记本边距线
  */
-export function NotebookMarginLine({ left = 88 }: { left?: number }) {
+export function NotebookMarginLine({ left = 72 }: { left?: number }) {
   return (
     <View
       style={{
@@ -149,11 +149,12 @@ export function NotebookMarginLine({ left = 88 }: { left?: number }) {
  */
 export function ProgressRing({
   progress,
-  size = 160,
-  strokeWidth = 12,
+  size = 128,
+  strokeWidth = 10,
   color = '#8B5E3C',
   trackColor = '#E8DFD0',
   children,
+  style,
 }: {
   progress: number
   size?: number
@@ -161,6 +162,7 @@ export function ProgressRing({
   color?: string
   trackColor?: string
   children?: React.ReactNode
+  style?: React.CSSProperties
 }) {
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -175,6 +177,7 @@ export function ProgressRing({
         justifyContent: 'center',
         width: `${size}px`,
         height: `${size}px`,
+        ...style,
       }}
     >
       {/* 使用 View 模拟圆环 - 小程序中 SVG 支持有限，用 border 方式实现 */}
@@ -187,6 +190,7 @@ export function ProgressRing({
           position: 'absolute',
           top: 0,
           left: 0,
+          boxSizing: 'border-box',
         }}
       />
       {/* 进度弧 - 用旋转的半圆实现 */}
@@ -205,16 +209,17 @@ export function ProgressRing({
           top: 0,
           left: 0,
           transition: 'transform 0.3s ease',
+          boxSizing: 'border-box',
         }}
       />
-      {/* 中心内容 */}
+      {/* 中心内容 - 内缩 strokeWidth，使文字精确位于圆环内圈中心 */}
       <View
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: `${strokeWidth}px`,
+          left: `${strokeWidth}px`,
+          right: `${strokeWidth}px`,
+          bottom: `${strokeWidth}px`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -243,11 +248,11 @@ export function ChineseHandwritten({
   style?: React.CSSProperties
 }) {
   const sizes: Record<string, string> = {
-    sm: '24px',
-    base: '30px',
-    lg: '36px',
-    xl: '42px',
-    '2xl': '52px',
+    sm: '20px',
+    base: '24px',
+    lg: '30px',
+    xl: '36px',
+    '2xl': '44px',
   }
   return (
     <Text
@@ -282,11 +287,11 @@ export function HandwrittenLabel({
   style?: React.CSSProperties
 }) {
   const sizes: Record<string, string> = {
-    sm: '26px',
-    base: '32px',
-    lg: '38px',
-    xl: '44px',
-    '2xl': '52px',
+    sm: '22px',
+    base: '26px',
+    lg: '30px',
+    xl: '36px',
+    '2xl': '44px',
   }
   return (
     <Text
@@ -329,10 +334,10 @@ export function SpiralBinding() {
         <View
           key={i}
           style={{
-            width: '20px',
-            height: '16px',
+            width: '16px',
+            height: '12px',
             borderRadius: '50%',
-            border: '4px solid var(--primary)',
+            border: '3px solid var(--primary)',
             opacity: 0.45,
             background: 'transparent',
           }}
@@ -351,9 +356,9 @@ export function PencilDivider({ label }: { label?: string }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        marginTop: '12px',
-        marginBottom: '12px',
+        gap: '6px',
+        marginTop: '8px',
+        marginBottom: '8px',
       }}
     >
       <View
@@ -369,7 +374,7 @@ export function PencilDivider({ label }: { label?: string }) {
           style={{
             paddingLeft: '8px',
             paddingRight: '8px',
-            fontSize: '24px',
+            fontSize: '20px',
             fontFamily: "'Segoe Script', cursive",
             color: 'var(--muted-foreground)',
           }}
@@ -400,7 +405,7 @@ export function EmojiRating({
 }) {
   const emojis = ['😞', '😕', '😐', '😊', '😄']
   return (
-    <View style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+    <View style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
       {emojis.map((emoji, i) => {
         const isActive = value === i + 1
         return (
@@ -408,7 +413,7 @@ export function EmojiRating({
             key={i}
             onClick={() => onChange(i + 1)}
             style={{
-              fontSize: isActive ? '56px' : '44px',
+              fontSize: isActive ? '44px' : '34px',
               transform: isActive ? 'scale(1.15) translateY(-4px)' : 'scale(1)',
               filter: isActive ? 'none' : 'grayscale(0.3)',
               transition: 'all 0.15s ease',
@@ -440,14 +445,14 @@ export function TagChip({
     <View
       onClick={onClick}
       style={{
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        paddingTop: '8px',
-        paddingBottom: '8px',
+        paddingLeft: '18px',
+        paddingRight: '18px',
+        paddingTop: '6px',
+        paddingBottom: '6px',
         borderRadius: '9999px',
         border: `2px solid ${active ? (color || 'var(--primary)') : 'var(--border)'}`,
         fontFamily: "'STKaiti', 'KaiTi', serif",
-        fontSize: '26px',
+        fontSize: '22px',
         backgroundColor: active ? (color || 'var(--primary)') : 'transparent',
         color: active ? 'var(--primary-foreground)' : 'var(--foreground)',
         transform: active ? 'scale(1.05)' : 'scale(1)',
@@ -484,17 +489,17 @@ export function PaperTextarea({
       value={value}
       onInput={(e) => onChange(e.detail.value)}
       placeholder={placeholder}
-      placeholderStyle={`color: var(--muted-foreground); font-family: 'Segoe Script', cursive; font-size: 28px;`}
+      placeholderStyle={`color: var(--muted-foreground); font-family: 'Segoe Script', cursive; font-size: 22px;`}
       className={className}
       style={{
         width: '100%',
-        minHeight: `${rows * 64}px`,
+        minHeight: `${rows * 52}px`,
         outline: 'none',
         background: 'transparent',
         fontFamily: "'Segoe Script', cursive",
-        fontSize: '32px',
+        fontSize: '26px',
         color: 'var(--foreground)',
-        lineHeight: '64px',
+        lineHeight: '52px',
         border: 'none',
         ...style,
       }}

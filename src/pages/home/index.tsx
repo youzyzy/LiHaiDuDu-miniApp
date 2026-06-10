@@ -120,7 +120,7 @@ export default function HomePage() {
                 研究进度
               </ChineseHandwritten>
               <View style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '4px' }}>
-                <HandwrittenLabel size="2xl" color="var(--primary)">
+                <HandwrittenLabel size="xl" color="var(--primary)">
                   第 {CURRENT_DAY} 天
                 </HandwrittenLabel>
                 <HandwrittenLabel size="sm" color="var(--muted-foreground)">
@@ -134,10 +134,11 @@ export default function HomePage() {
 
             <ProgressRing
               progress={progress}
-              size={74}
-              strokeWidth={7}
+              size={82}
+              strokeWidth={8}
               color="var(--primary)"
               trackColor="var(--muted)"
+              style={{ marginRight: '-1px', marginTop: '-4px' }}
             >
               <View style={{ textAlign: 'center' }}>
                 <HandwrittenLabel size="lg" color="var(--primary)">
