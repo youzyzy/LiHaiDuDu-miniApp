@@ -16,6 +16,7 @@ import {
 
 const LOCATIONS = ['家里', '宿舍', '餐厅', '食堂', '办公室', '路上', '咖啡厅', '其他']
 const COMPANIONS = ['独自', '家人', '朋友', '同事', '伴侣']
+const MEAL_SCENES = ['工作/课程间隙', '聚餐', '日常家庭用餐', '吃漂亮饭', '其他']
 const MEDIA = ['手机', '电视', '电脑', '音乐', '播客', '无']
 const HUNGER_TIMING = ['15分钟', '30分钟', '1小时', '2小时', '3小时+']
 
@@ -28,6 +29,7 @@ interface FormState {
   chewFreq: number
   location: string
   companions: string[]
+  mealScenes: string[]
   media: string[]
   satisfaction: number
   hungerReturn: string
@@ -146,6 +148,11 @@ function ChewCounter({
 }
 
 export default function MealEntryPage() {
+  const getDateString = () => {
+    const now = new Date()
+    return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`
+  }
+
   const [form, setForm] = useState<FormState>({
     foodDesc: '',
     photoTaken: false,
@@ -155,6 +162,7 @@ export default function MealEntryPage() {
     chewFreq: 15,
     location: '',
     companions: [],
+    mealScenes: [],
     media: [],
     satisfaction: 0,
     hungerReturn: '',
@@ -163,12 +171,16 @@ export default function MealEntryPage() {
   })
 
   const [saved, setSaved] = useState(false)
+  const [mealNumber, setMealNumber] = useState(1)
+  const [showMealPicker, setShowMealPicker] = useState(false)
+  const [pressedMeal, setPressedMeal] = useState('')
+  const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | ''>('lunch')
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const toggleArr = (key: 'companions' | 'media', val: string) => {
+  const toggleArr = (key: 'companions' | 'mealScenes' | 'media', val: string) => {
     setForm((prev) => {
       const arr = prev[key]
       const next = arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]
@@ -244,7 +256,7 @@ export default function MealEntryPage() {
             用餐记录
           </ChineseHandwritten>
           <HandwrittenLabel size="sm" color="var(--muted-foreground)" style={{ display: 'block' }}>
-            Meal Entry · 2026年6月5日
+            {getDateString()}
           </HandwrittenLabel>
         </View>
         <WashiTape
@@ -278,16 +290,96 @@ export default function MealEntryPage() {
 
       {/* Meal number badge */}
       <View style={{ paddingLeft: '24px', paddingRight: '24px', paddingTop: '16px', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <StickyNote color="#FFF3A3" rotation={-1.5} className="rounded-lg" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '4px', paddingBottom: '4px' }}>
-          <ChineseHandwritten size="sm" color="var(--foreground)">
-            🍽️ 第 1 餐
-          </ChineseHandwritten>
-        </StickyNote>
-        <StickyNote color="#D6F0D6" rotation={1} className="rounded-lg" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '4px', paddingBottom: '4px' }}>
-          <ChineseHandwritten size="sm" color="var(--foreground)">
-            🕐 午餐
-          </ChineseHandwritten>
-        </StickyNote>
+        <View style={{ position: 'relative' }}>
+          <View onClick={() => setShowMealPicker(!showMealPicker)}>
+            <StickyNote
+              color="#FFF3A3"
+              rotation={-1.5}
+              className="rounded-lg"
+              style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}
+            >
+              <ChineseHandwritten size="xs" color="var(--foreground)">
+                🍽️ 第 {mealNumber} 餐
+              </ChineseHandwritten>
+            </StickyNote>
+          </View>
+          {showMealPicker && (
+            <View
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                marginTop: '4px',
+                zIndex: 100,
+                background: 'var(--card)',
+                borderRadius: '12px',
+                border: '1px solid var(--border)',
+                overflow: 'hidden',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              }}
+            >
+              {[1, 2, 3].map((n) => (
+                <View
+                  key={n}
+                  onClick={() => {
+                    setMealNumber(n)
+                    setShowMealPicker(false)
+                  }}
+                  style={{
+                    paddingTop: '10px',
+                    paddingBottom: '10px',
+                    paddingLeft: '16px',
+                    paddingRight: '16px',
+                    background: mealNumber === n ? 'var(--accent)' : 'transparent',
+                  }}
+                >
+                  <ChineseHandwritten size="sm" color={mealNumber === n ? 'var(--accent-foreground)' : 'var(--foreground)'}>
+                    第 {n} 餐
+                  </ChineseHandwritten>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+        <View
+          onClick={() => {
+            setPressedMeal('breakfast')
+            setTimeout(() => setPressedMeal(''), 150)
+          }}
+          style={{ transform: pressedMeal === 'breakfast' ? 'scale(0.9)' : 'scale(1)' }}
+        >
+          <StickyNote color="#FFD6D6" rotation={-1} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
+            <ChineseHandwritten size="xs" color="var(--foreground)">
+              早餐
+            </ChineseHandwritten>
+          </StickyNote>
+        </View>
+        <View
+          onClick={() => {
+            setPressedMeal('lunch')
+            setTimeout(() => setPressedMeal(''), 150)
+          }}
+          style={{ transform: pressedMeal === 'lunch' ? 'scale(0.9)' : 'scale(1)' }}
+        >
+          <StickyNote color="#D6F0D6" rotation={1} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
+            <ChineseHandwritten size="xs" color="var(--foreground)">
+              午餐
+            </ChineseHandwritten>
+          </StickyNote>
+        </View>
+        <View
+          onClick={() => {
+            setPressedMeal('dinner')
+            setTimeout(() => setPressedMeal(''), 150)
+          }}
+          style={{ transform: pressedMeal === 'dinner' ? 'scale(0.9)' : 'scale(1)' }}
+        >
+          <StickyNote color="#D6E8FF" rotation={-1.5} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
+            <ChineseHandwritten size="xs" color="var(--foreground)">
+              晚餐
+            </ChineseHandwritten>
+          </StickyNote>
+        </View>
       </View>
 
       {/* === SECTION: Food Description === */}
@@ -482,6 +574,23 @@ export default function MealEntryPage() {
               label={c}
               active={form.companions.includes(c)}
               onClick={() => toggleArr('companions', c)}
+              color="var(--secondary)"
+            />
+          ))}
+        </View>
+      </Section>
+
+      <PencilDivider />
+
+      {/* === SECTION: Meal Scene === */}
+      <Section icon="🍽️" title="用餐场景">
+        <View style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {MEAL_SCENES.map((s) => (
+            <TagChip
+              key={s}
+              label={s}
+              active={form.mealScenes.includes(s)}
+              onClick={() => toggleArr('mealScenes', s)}
               color="var(--secondary)"
             />
           ))}

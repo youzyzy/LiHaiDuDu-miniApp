@@ -49,6 +49,12 @@ const recentEntries = [
 ]
 
 export default function HomePage() {
+  const getDateString = () => {
+    const now = new Date()
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${weekdays[now.getDay()]}`
+  }
+
   const handleStartEntry = () => {
     Taro.switchTab({ url: '/pages/entry/index' })
   }
@@ -76,10 +82,10 @@ export default function HomePage() {
         <View style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <View>
             <ChineseHandwritten size="2xl" style={{ display: 'block', lineHeight: 1.25 }} color="var(--primary)">
-              正念饮食日记
+              用餐日记
             </ChineseHandwritten>
             <HandwrittenLabel size="base" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '4px' }}>
-              Mindful Eating Diary
+              Eating Diary
             </HandwrittenLabel>
           </View>
           <View
@@ -194,7 +200,7 @@ export default function HomePage() {
               color: 'var(--muted-foreground)',
             }}
           >
-            2026年6月5日 · 周五
+            {getDateString()}
           </Text>
         </View>
 

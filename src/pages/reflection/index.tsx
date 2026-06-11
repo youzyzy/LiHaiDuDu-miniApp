@@ -16,7 +16,7 @@ const PROMPTS = [
   {
     id: 'mindfulness',
     icon: '🌸',
-    zh: '今日最印象深刻的一餐是哪餐？当时的感受是什么？',
+    zh: '今日最印象深刻的哪一餐？当时的感受是什么？',
     en: 'Which meal was most memorable today? How did it feel?',
     color: '#FFF3A3',
     rotation: -1,
@@ -44,29 +44,6 @@ const PROMPTS = [
     en: 'Were you able to sense hunger and fullness cues clearly today?',
     color: '#D6E8FF',
     rotation: 0.8,
-  },
-  {
-    id: 'distraction',
-    icon: '📱',
-    zh: '手机/媒体的使用如何影响了你的进食专注度？',
-    en: 'How did phone/media use affect your eating focus?',
-    color: '#E8D6F0',
-    rotation: -1.5,
-  },
-]
-
-const RESEARCH_OBSERVATIONS = [
-  {
-    id: 'obs1',
-    label: '今日整体进食速度评估',
-    en: 'Overall eating speed assessment',
-    options: ['非常慢', '较慢', '适中', '较快', '非常快'],
-  },
-  {
-    id: 'obs2',
-    label: '主观饥饿感水平（全天平均）',
-    en: 'Subjective hunger level (daily avg)',
-    options: ['1', '2', '3', '4', '5', '6', '7'],
   },
 ]
 
@@ -166,10 +143,13 @@ function PromptCard({
 
 export default function DailyReflectionPage() {
   const [responses, setResponses] = useState<Record<string, string>>({})
-  const [obsValues, setObsValues] = useState<Record<string, string>>({})
   const [saved, setSaved] = useState(false)
-  const [overallNote, setOverallNote] = useState('')
   const [selectedMoods, setSelectedMoods] = useState<string[]>([])
+
+  const getDateString = () => {
+    const now = new Date()
+    return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`
+  }
 
   const toggleMood = (key: string) => {
     setSelectedMoods((prev) =>
@@ -218,8 +198,8 @@ export default function DailyReflectionPage() {
             <ChineseHandwritten size="2xl" color="var(--primary)" style={{ display: 'block' }}>
               每日反思
             </ChineseHandwritten>
-            <HandwrittenLabel size="base" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '2px' }}>
-              Daily Reflection · 2026年6月5日
+            <HandwrittenLabel size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '2px' }}>
+              Reflection · {getDateString()}
             </HandwrittenLabel>
           </View>
         </View>
@@ -273,90 +253,6 @@ export default function DailyReflectionPage() {
             onChange={(v) => setResponse(prompt.id, v)}
           />
         ))}
-      </View>
-
-      <PencilDivider label="研究观察" />
-
-      {/* Research observations */}
-      <View style={{ paddingLeft: '24px', paddingRight: '24px', paddingBottom: '16px' }}>
-        <View style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-          <Text style={{ fontSize: '18px' }}>🔬</Text>
-          <ChineseHandwritten size="base" color="var(--primary)">
-            研究观察指标
-          </ChineseHandwritten>
-        </View>
-
-        {RESEARCH_OBSERVATIONS.map((obs) => (
-          <View key={obs.id} style={{ marginBottom: '16px' }}>
-            <ChineseHandwritten size="sm" color="var(--foreground)" style={{ display: 'block', marginBottom: '8px' }}>
-              {obs.label}
-            </ChineseHandwritten>
-            <HandwrittenLabel size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginBottom: '8px' }}>
-              {obs.en}
-            </HandwrittenLabel>
-            <View style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {obs.options.map((opt) => (
-                <View
-                  key={opt}
-                  onClick={() => setObsValues((prev) => ({ ...prev, [obs.id]: opt }))}
-                  style={{
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    paddingTop: '6px',
-                    paddingBottom: '6px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    fontFamily: "'STKaiti', 'KaiTi', serif",
-                    fontSize: '14px',
-                    background: obsValues[obs.id] === opt ? 'var(--primary)' : 'var(--card)',
-                    color: obsValues[obs.id] === opt ? 'var(--primary-foreground)' : 'var(--foreground)',
-                    borderColor: obsValues[obs.id] === opt ? 'var(--primary)' : 'var(--border)',
-                    transform: obsValues[obs.id] === opt ? 'scale(1.05)' : 'scale(1)',
-                  }}
-                >
-                  <Text>{opt}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <PencilDivider label="研究者备忘" />
-
-      {/* Overall notes for researcher */}
-      <View style={{ paddingLeft: '24px', paddingRight: '24px', paddingBottom: '16px' }}>
-        <StickyNote color="#FFF3A3" rotation={-0.5} className="rounded-xl" style={{ marginBottom: '12px' }}>
-          <View style={{ display: 'flex', gap: '8px' }}>
-            <Text style={{ fontSize: '18px' }}>📌</Text>
-            <ChineseHandwritten size="sm" color="var(--foreground)">
-              研究员可在此记录额外观察、异常情况或今日特殊事件
-            </ChineseHandwritten>
-          </View>
-        </StickyNote>
-
-        <View
-          style={{
-            borderRadius: '12px',
-            padding: '16px',
-            position: 'relative',
-            overflow: 'hidden',
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            minHeight: '120px',
-          }}
-        >
-          <PaperRuledLines />
-          <NotebookMarginLine />
-          <View style={{ paddingLeft: '48px', position: 'relative', zIndex: 10 }}>
-            <PaperTextarea
-              value={overallNote}
-              onChange={setOverallNote}
-              placeholder="研究者备注... (Researcher notes — special circumstances, deviations, additional observations)"
-              rows={5}
-            />
-          </View>
-        </View>
       </View>
 
       {/* Mood & wellbeing quick capture */}
