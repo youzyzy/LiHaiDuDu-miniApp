@@ -67,7 +67,7 @@ function TimeInput({
         }}
       />
       <Text style={{ fontSize: '20px', color: 'var(--muted-foreground)', display: 'block', textAlign: 'center', marginTop: '2px' }}>
-        (请输入如 12:00)
+        (例 12:00)
       </Text>
     </View>
   )
@@ -124,7 +124,7 @@ function ChewCounter({
           {value}
         </HandwrittenLabel>
         <ChineseHandwritten size="sm" color="var(--muted-foreground)" style={{ display: 'block' }}>
-          次/分钟
+          次/口
         </ChineseHandwritten>
       </View>
       <View
@@ -303,14 +303,15 @@ export default function MealEntryPage() {
             minHeight: '120px',
           }}
         >
-          <PaperRuledLines />
-          <NotebookMarginLine />
+          <PaperRuledLines lineHeight={40} />
+          <NotebookMarginLine left={40} />
           <View style={{ paddingLeft: '48px', position: 'relative', zIndex: 10 }}>
             <PaperTextarea
               value={form.foodDesc}
               onChange={(v) => update('foodDesc', v)}
-              placeholder="今天吃了什么？描述食物、口感、分量... (What did you eat?)"
+              placeholder="今天吃了什么？"
               rows={4}
+              style={{ paddingTop: '12px' }}
             />
           </View>
         </View>
@@ -450,9 +451,6 @@ export default function MealEntryPage() {
               </View>
             ))}
           </View>
-          <HandwrittenLabel size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '8px', textAlign: 'center' }}>
-            Estimated chews per minute
-          </HandwrittenLabel>
         </View>
       </Section>
 
@@ -549,53 +547,7 @@ export default function MealEntryPage() {
         </View>
       </Section>
 
-      <PencilDivider />
 
-      {/* === SECTION: Hunger Return === */}
-      <Section icon="🕐" title="饥饿感回归时间">
-        <ChineseHandwritten size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginBottom: '8px' }}>
-          预计多久后再次感到饥饿？
-        </ChineseHandwritten>
-        <View style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {HUNGER_TIMING.map((t) => (
-            <TagChip
-              key={t}
-              label={t}
-              active={form.hungerReturn === t}
-              onClick={() => update('hungerReturn', form.hungerReturn === t ? '' : t)}
-              color="var(--accent)"
-            />
-          ))}
-        </View>
-      </Section>
-
-      <PencilDivider />
-
-      {/* === SECTION: Additional Notes === */}
-      <Section icon="📝" title="补充备注">
-        <View
-          style={{
-            borderRadius: '12px',
-            padding: '16px',
-            position: 'relative',
-            overflow: 'hidden',
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            minHeight: '100px',
-          }}
-        >
-          <PaperRuledLines />
-          <NotebookMarginLine />
-          <View style={{ paddingLeft: '48px', position: 'relative', zIndex: 10 }}>
-            <PaperTextarea
-              value={form.notes}
-              onChange={(v) => update('notes', v)}
-              placeholder="其他补充... (Any other notes?)"
-              rows={3}
-            />
-          </View>
-        </View>
-      </Section>
 
       {/* Save button */}
       <View style={{ paddingLeft: '24px', paddingRight: '24px', paddingBottom: '32px' }}>

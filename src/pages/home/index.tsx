@@ -372,9 +372,9 @@ export default function HomePage() {
               <ChineseHandwritten size="sm" color="var(--foreground)" style={{ display: 'block' }}>
                 研究员备注
               </ChineseHandwritten>
-              <HandwrittenLabel size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '4px' }}>
-                Please log meals within 30 min of finishing. Include drinks and snacks. Your data is confidential.
-              </HandwrittenLabel>
+              <ChineseHandwritten size="sm" color="var(--muted-foreground)" style={{ display: 'block', marginTop: '4px' }}>
+                请确保您记录的是正餐，并在餐后30分钟内完成记录。
+              </ChineseHandwritten>
             </View>
           </View>
         </StickyNote>
