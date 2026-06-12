@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Input } from '@tarojs/components'
+import { View, Text, Input, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import {
   WashiTape,
@@ -24,6 +24,7 @@ interface FormState {
   foodDesc: string
   photoTaken: boolean
   photoPath: string
+  photoFileID: string
   startTime: string
   endTime: string
   chewFreq: number
@@ -157,6 +158,7 @@ export default function MealEntryPage() {
     foodDesc: '',
     photoTaken: false,
     photoPath: '',
+    photoFileID: '',
     startTime: '12:00',
     endTime: '12:28',
     chewFreq: 15,
@@ -195,33 +197,93 @@ export default function MealEntryPage() {
     return diff > 0 ? diff : '--'
   })()
 
-  const handleSave = () => {
-    setSaved(true)
-    Taro.showToast({ title: '记录已保存', icon: 'success', duration: 2000 })
-    setTimeout(() => setSaved(false), 2000)
+  const handleSave = async () => {
+    // 组装要上传的完整记录数据
+    const recordData = {
+      date: getDateString(),
+      mealNumber,
+      mealType: selectedMealType,
+      foodDesc: form.foodDesc,
+      photoTaken: form.photoTaken,
+      photoFileID: form.photoFileID,
+      startTime: form.startTime,
+      endTime: form.endTime,
+      duration: durationMinutes,
+      chewFreq: form.chewFreq,
+      location: form.location,
+      companions: form.companions,
+      mealScenes: form.mealScenes,
+      media: form.media,
+      satisfaction: form.satisfaction,
+      moodBefore: form.moodBefore,
+      notes: form.notes,
+    }
+
+    try {
+      if (Taro.cloud) {
+        const res = await Taro.cloud.callFunction({
+          name: 'saveRecord',
+          data: { record: recordData },
+        })
+        const result = res.result as any
+        if (result?.success) {
+          setSaved(true)
+          Taro.showToast({ title: '记录已保存', icon: 'success', duration: 2000 })
+          setTimeout(() => setSaved(false), 2000)
+        } else {
+          Taro.showToast({ title: '保存失败: ' + result?.error, icon: 'none', duration: 2000 })
+        }
+      } else {
+        // 非云开发环境，本地保存（模拟器兼容）
+        setSaved(true)
+        console.log('[本地] 记录数据:', JSON.stringify(recordData))
+        Taro.showToast({ title: '记录已保存（本地）', icon: 'success', duration: 2000 })
+        setTimeout(() => setSaved(false), 2000)
+      }
+    } catch (err: any) {
+      console.error('保存出错:', err)
+      Taro.showToast({ title: '网络错误，请重试', icon: 'none', duration: 2000 })
+    }
   }
 
   const handleTakePhoto = () => {
-    // TODO: 模拟器中 Taro.chooseImage 不可用，暂时用模拟拍照
-    // 真机调试时取消下方注释即可启用真实拍照
-    /*
     Taro.chooseImage({
       count: 1,
       sizeType: ['compressed'],
       sourceType: ['camera', 'album'],
-      success: (res) => {
-        update('photoTaken', true)
-        update('photoPath', res.tempFilePaths[0])
+      success: async (res) => {
+        const tempPath = res.tempFilePaths[0]
+        update('photoPath', tempPath)
+
+        // 上传到云存储
+        if (Taro.cloud) {
+          try {
+            Taro.showLoading({ title: '上传中...' })
+            const cloudRes = await Taro.cloud.uploadFile({
+              cloudPath: `food-photos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`,
+              filePath: tempPath,
+            })
+            update('photoFileID', cloudRes.fileID)
+            update('photoTaken', true)
+            Taro.hideLoading()
+            Taro.showToast({ title: '照片已上传', icon: 'success', duration: 1500 })
+          } catch (err) {
+            Taro.hideLoading()
+            console.error('上传失败:', err)
+            // 上传失败时仍标记已拍照（本地路径兜底）
+            update('photoTaken', true)
+            Taro.showToast({ title: '上传失败，已保存本地', icon: 'none', duration: 2000 })
+          }
+        } else {
+          // 非云环境，仅标记已拍照
+          update('photoTaken', true)
+          Taro.showToast({ title: '拍照成功', icon: 'success', duration: 1500 })
+        }
       },
       fail: () => {
-        // Fallback: mark as taken even if camera fails
-        update('photoTaken', true)
+        Taro.showToast({ title: '未拍照', icon: 'none', duration: 1500 })
       },
     })
-    */
-    // 模拟拍照：直接标记已拍照（模拟器中不调用真实相机 API）
-    update('photoTaken', true)
-    Taro.showToast({ title: '模拟拍照成功（真机将调用相机）', icon: 'none', duration: 1500 })
   }
 
   const handleBack = () => {
@@ -343,41 +405,98 @@ export default function MealEntryPage() {
         </View>
         <View
           onClick={() => {
+            setSelectedMealType('breakfast')
             setPressedMeal('breakfast')
             setTimeout(() => setPressedMeal(''), 150)
           }}
-          style={{ transform: pressedMeal === 'breakfast' ? 'scale(0.9)' : 'scale(1)' }}
+          style={{
+            transform: pressedMeal === 'breakfast' ? 'scale(0.9)' : selectedMealType === 'breakfast' ? 'scale(1.08)' : 'scale(1)',
+            transition: 'transform 0.15s ease',
+          }}
         >
-          <StickyNote color="#FFD6D6" rotation={-1} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
-            <ChineseHandwritten size="xs" color="var(--foreground)">
-              早餐
-            </ChineseHandwritten>
+          <StickyNote
+            color="#FFD6D6"
+            rotation={-1}
+            className="rounded-lg"
+            shadow={selectedMealType === 'breakfast'}
+            style={{
+              paddingLeft: '6px',
+              paddingRight: '6px',
+              paddingTop: '1px',
+              paddingBottom: '1px',
+              border: selectedMealType === 'breakfast' ? '3px solid #E88B8B' : '3px solid transparent',
+            }}
+          >
+            <View style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              {selectedMealType === 'breakfast' && <Text style={{ fontSize: '14px' }}>✓</Text>}
+              <ChineseHandwritten size="xs" color="var(--foreground)">
+                早餐
+              </ChineseHandwritten>
+            </View>
           </StickyNote>
         </View>
         <View
           onClick={() => {
+            setSelectedMealType('lunch')
             setPressedMeal('lunch')
             setTimeout(() => setPressedMeal(''), 150)
           }}
-          style={{ transform: pressedMeal === 'lunch' ? 'scale(0.9)' : 'scale(1)' }}
+          style={{
+            transform: pressedMeal === 'lunch' ? 'scale(0.9)' : selectedMealType === 'lunch' ? 'scale(1.08)' : 'scale(1)',
+            transition: 'transform 0.15s ease',
+          }}
         >
-          <StickyNote color="#D6F0D6" rotation={1} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
-            <ChineseHandwritten size="xs" color="var(--foreground)">
-              午餐
-            </ChineseHandwritten>
+          <StickyNote
+            color="#D6F0D6"
+            rotation={1}
+            className="rounded-lg"
+            shadow={selectedMealType === 'lunch'}
+            style={{
+              paddingLeft: '6px',
+              paddingRight: '6px',
+              paddingTop: '1px',
+              paddingBottom: '1px',
+              border: selectedMealType === 'lunch' ? '3px solid #7CB97C' : '3px solid transparent',
+            }}
+          >
+            <View style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              {selectedMealType === 'lunch' && <Text style={{ fontSize: '14px' }}>✓</Text>}
+              <ChineseHandwritten size="xs" color="var(--foreground)">
+                午餐
+              </ChineseHandwritten>
+            </View>
           </StickyNote>
         </View>
         <View
           onClick={() => {
+            setSelectedMealType('dinner')
             setPressedMeal('dinner')
             setTimeout(() => setPressedMeal(''), 150)
           }}
-          style={{ transform: pressedMeal === 'dinner' ? 'scale(0.9)' : 'scale(1)' }}
+          style={{
+            transform: pressedMeal === 'dinner' ? 'scale(0.9)' : selectedMealType === 'dinner' ? 'scale(1.08)' : 'scale(1)',
+            transition: 'transform 0.15s ease',
+          }}
         >
-          <StickyNote color="#D6E8FF" rotation={-1.5} className="rounded-lg" style={{ paddingLeft: '6px', paddingRight: '6px', paddingTop: '1px', paddingBottom: '1px' }}>
-            <ChineseHandwritten size="xs" color="var(--foreground)">
-              晚餐
-            </ChineseHandwritten>
+          <StickyNote
+            color="#D6E8FF"
+            rotation={-1.5}
+            className="rounded-lg"
+            shadow={selectedMealType === 'dinner'}
+            style={{
+              paddingLeft: '6px',
+              paddingRight: '6px',
+              paddingTop: '1px',
+              paddingBottom: '1px',
+              border: selectedMealType === 'dinner' ? '3px solid #6B9FD4' : '3px solid transparent',
+            }}
+          >
+            <View style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              {selectedMealType === 'dinner' && <Text style={{ fontSize: '14px' }}>✓</Text>}
+              <ChineseHandwritten size="xs" color="var(--foreground)">
+                晚餐
+              </ChineseHandwritten>
+            </View>
           </StickyNote>
         </View>
       </View>
@@ -426,12 +545,38 @@ export default function MealEntryPage() {
           }}
         >
           {form.photoTaken ? (
-            <View style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <Text style={{ fontSize: '40px' }}>🥗</Text>
-              <ChineseHandwritten size="sm" color="var(--secondary)">
-                已拍照 · 点击重拍
-              </ChineseHandwritten>
-            </View>
+            form.photoPath ? (
+              <View style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <Image
+                  src={form.photoPath}
+                  mode="aspectFill"
+                  style={{ width: '100%', height: '100%' }}
+                />
+                {/* 点击重拍提示 */}
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    right: '8px',
+                    paddingLeft: '10px',
+                    paddingRight: '10px',
+                    paddingTop: '4px',
+                    paddingBottom: '4px',
+                    borderRadius: '8px',
+                    background: 'rgba(0,0,0,0.45)',
+                  }}
+                >
+                  <Text style={{ fontSize: '12px', color: '#fff' }}>点击重拍</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Text style={{ fontSize: '40px' }}>🥗</Text>
+                <ChineseHandwritten size="sm" color="var(--secondary)">
+                  已拍照 · 点击重拍
+                </ChineseHandwritten>
+              </View>
+            )
           ) : (
             <View style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
               <View
