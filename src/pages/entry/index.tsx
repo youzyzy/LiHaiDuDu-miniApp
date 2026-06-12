@@ -401,7 +401,7 @@ export default function MealEntryPage() {
             <PaperTextarea
               value={form.foodDesc}
               onChange={(v) => update('foodDesc', v)}
-              placeholder="今天吃了什么？"
+              placeholder="今天吃了什么？描述食物口感、分量..."
               rows={4}
               style={{ paddingTop: '12px' }}
             />
